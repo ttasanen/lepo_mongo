@@ -1,11 +1,36 @@
 module LepoMongo
   module Helpers
+
+    def config
+      return @config if @config
+
+      @defaults = {mongo_host: 'localhost', mongo_port: 27017, hide_databases: ['local', 'admin'], hide_collections: ['system.indexes']}
+
+      if File.exists?('config/config.yml')
+        @config = @defaults.merge(YAML.load(File.read('config/config.yml')))
+      end
+    end
+
     def connection
       @connection ||= Mongo::Connection.new
     end
 
+    def authenticate!
+      # TODO: authentication
+      puts params.inspect
+      true
+    end
+
+
+    def database_names
+      connection.database_names.reject!{|x| config[:hide_databases].include?(x)}
+    end
+
+    def collection_names
+      current_database.collection_names.reject!{|x| config[:hide_collections].include?(x)}
+    end
+
     def use_database(db)
-      # TODO: Filter system dbs
       # TODO: 404 if not exists, Strict option?
       @dbs ||= {}
       return @dbs[db] if @dbs[db]
