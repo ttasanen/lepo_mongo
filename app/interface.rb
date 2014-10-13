@@ -16,8 +16,8 @@ module LepoMongo
 
     helpers LepoMongo::Helpers
 
-    mount LepoMongo::Databases
-    mount LepoMongo::Collections
     mount LepoMongo::Documents
+    mount LepoMongo::Collections
+    mount LepoMongo::Databases
   end
 end
