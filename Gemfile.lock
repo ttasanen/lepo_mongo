@@ -46,8 +46,6 @@ GEM
     rack-cors (0.2.9)
     rack-mount (0.8.3)
       rack (>= 1.0.0)
-    rack-test (0.6.2)
-      rack (>= 1.0)
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
       rspec-expectations (~> 3.1.0)
@@ -81,5 +79,4 @@ DEPENDENCIES
   json
   mongo
   rack-cors
-  rack-test
   rspec
