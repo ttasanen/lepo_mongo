@@ -1,104 +1,54 @@
 module LepoMongo
   module Helpers
 
-    def config
-      return @config if @config
-
-      @defaults = {mongo_host: 'localhost', mongo_port: 27017, hide_databases: ['local', 'admin', 'lepo_mongo'], hide_collections: ['system.indexes']}
-
-      if File.exists?('config/config.yml')
-        @config = @defaults.merge(YAML.load(File.read('config/config.yml')))
-      end
-    end
-
     def connection
-      @connection ||= Mongo::Connection.new
+      host = ENV['mongo_host'] || 'localhost'
+      port = ENV['mongo_port'] || 27017
+
+      @connn ||= Mongo::Connection.new(host, port)
     end
 
     def authenticate!
-      # TODO: authentication
-      puts params.inspect
+      @conf = use_database('lepo_mongo').collection('lepo_config').find
+      puts @conf.inspect
       true
     end
 
-
-    # TODO: is this actually needed? Grape supports params requirements..
-    def require_params!(required_params)
-      required_params = [required_params] unless required_params.is_a?(Array)
-      required_params.map!{|x| x.to_s}
-
-      missing = required_params - ((params.keys - @env['rack.routing_args'].keys) & required_params)
-
-      unless missing.empty?
-        error!(["Missgin required parameters: ", missing], 400);
-      end
-    end
-
-    def find_in_collection(collection = current_collection, query = parse_query)
-      collection.find().to_a
-    end
-
-    def parse_query
-
+    def current_api_key
     end
 
     def create_database(database_name)
-      status = use_database(database_name).collection_names
-
-      !!status
+      use_database(database_name).collection_names
+      database_names.include?(database_name)
     end
 
-    def database_exists?(database_name, filtered = true)
-      database_names(filtered).include?(database_name)
+    def database_exists?(database_name)
+      database_names.include?(database_name)
     end
 
-    def require_collection(collection_name)
-      unless collection_names.include?(collection_name)
-        error!("Could not find collection #{collection_name}", 404)
-      end
+    def collection_exists?(database_name, collection_name)
+      database_exists?(database_name) && use_database(database_name).collection_names.include?(collection_name)
     end
 
-    def require_database(database_name)
-      unless database_exists?(database_name)
-        error!("Could not find database #{database_name}", 404)
-      end
+    def databases
+      connection.database_names || []
     end
 
-    def database_names(filtered = true)
-      dbs = connection.database_names
-      if filtered
-        dbs.reject!{|x| config[:hide_databases].include?(x)}
-      else
-        dbs
-      end
+    def collections(database_name)
+      use_database(database_name).collection_names || []
     end
 
-    def collection_names(db = current_database)
-      db.collection_names.reject!{|x| config[:hide_collections].include?(x)} || []
+    def filtered_databases
+      databases.reject{|x| ['lepo_mongo'].include?(x)}
     end
 
-    def use_database(db)
-      # TODO: 404 if not exists, Strict option?
-      @dbs ||= {}
-      return @dbs[db] if @dbs[db]
-
-      @dbs[db] = connection.db(db)
+    def filtered_collections(database_name)
+      collections(database_name).reject{|x| ['system.indexes'].include?(x)}
     end
 
-    def current_database
-      @db = use_database(params[:db])
-      # TODO: Filter system dbs
-      # TODO: 404 if not exists, Strict option?
-      unless @db
-        error!("Database #{params[:db]} does not exist")
-      end
-      @db
+    def use_database(database)
+      connection.db(database)
     end
 
-    def current_collection
-      # TODO: Check if exist
-      # TODO: 404 if not exists, Strict option?
-      current_database.collection(params[:collection])
-    end
   end
 end

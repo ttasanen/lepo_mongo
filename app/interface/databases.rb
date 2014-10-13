@@ -6,14 +6,13 @@ module LepoMongo
     # GET /
     # List database names
     get '/' do
-      database_names
+      databases
     end
 
     # POST /
     # Create a new database if it does not exist
     post '/' do
-      require_params!(:db)
-      error!("Database already exists", 406) if database_exists?(params[:db], false)
+      error!("Database already exists", 406) if database_exists?(params[:db])
 
       if create_database(params[:db])
         status 201
