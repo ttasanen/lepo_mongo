@@ -14,6 +14,8 @@ module LepoMongo
     content_type :json, 'application/json'
     content_type :xml, 'text/xml'
 
+    formatter :json, ->(obj, env) { JSON.pretty_generate(obj)  }
+
     helpers LepoMongo::Helpers
 
     mount LepoMongo::Documents
