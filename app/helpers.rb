@@ -2,19 +2,27 @@ module LepoMongo
   module Helpers
 
     def connection
-      host = ENV['mongo_host'] || 'localhost'
-      port = ENV['mongo_port'] || 27017
+      return @conn if @conn
 
-      @connn ||= Mongo::Connection.new(host, port)
+      host = ENV['LEPO_MONGO_HOST'] || 'localhost'
+      port = ENV['LEPO_MONGO_PORT'] || Mongo::MongoClient::DEFAULT_PORT
+
+      @conn = Mongo::Connection.new(host, port)
+    end
+
+    def config
+      return @conf if @conf
+
+      id = {}
+      id = Mongo::ObjectID(ENV['LEPO_MONGO_CONF']) if ENV['LEPO_MONGO_CONF']
+
+      @conf = use_database('lepo_mongo').collection('lepo_config').find_one(id) || {}
     end
 
     def authenticate!
-      @conf = use_database('lepo_mongo').collection('lepo_config').find
-      puts @conf.inspect
+      puts params.inspect
+      puts @env.inspect
       true
-    end
-
-    def current_api_key
     end
 
     def create_database(database_name)
