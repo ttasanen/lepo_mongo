@@ -17,5 +17,12 @@ module LepoMongo
     delete '/:db/:collection' do
     end
 
+
+    # PATCH /db/collection
+    # Updates collection (Rename)
+    patch '/:db/:collection' do
+      #db.rename_collection
+    end
+
   end
 end
