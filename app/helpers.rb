@@ -27,7 +27,7 @@ module LepoMongo
     end
 
     def collection_exists?(database_name, collection_name)
-      database_exists?(database_name) && use_database(database_name).collection_names.include?(collection_name)
+      database_exists?(database_name) && collections(database_name).include?(collection_name)
     end
 
     def databases
