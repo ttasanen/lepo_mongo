@@ -6,7 +6,7 @@ module LepoMongo
     # GET /
     # List database names
     get '/' do
-      databases
+      filtered_databases
     end
 
     # POST /
