@@ -39,10 +39,11 @@ module LepoMongo
     end
 
     def filtered_databases
-      databases.reject{|x| ['lepo_mongo'].include?(x)}
+      databases.reject{|x| ['lepo_mongo', 'admin', 'local'].include?(x)}
     end
 
     def filtered_collections(database_name)
+      # TODO: 2.0.0 does this automatically
       collections(database_name).reject{|x| ['system.indexes'].include?(x)}
     end
 
