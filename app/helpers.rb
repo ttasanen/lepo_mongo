@@ -2,26 +2,55 @@ module LepoMongo
   module Helpers
 
     def connection
-      return @conn if @conn
+      @conn ||= get_connection
+    end
 
+    def get_connection
       host = ENV['LEPO_MONGO_HOST'] || 'localhost'
       port = ENV['LEPO_MONGO_PORT'] || Mongo::MongoClient::DEFAULT_PORT
 
-      @conn = Mongo::Connection.new(host, port)
+      Mongo::Connection.new(host, port)
     end
 
     def config
-      return @conf if @conf
+      @conf ||= get_config
+    end
 
-      id = {}
-      id = Mongo::ObjectID(ENV['LEPO_MONGO_CONF']) if ENV['LEPO_MONGO_CONF']
+    def get_config
+      config_id = ENV['LEPO_MONGO_CONF']
 
-      @conf = use_database('lepo_mongo').collection('lepo_config').find_one(id) || {}
+      return default_config if config_id.nil?
+
+      if  BSON::ObjectId.legal?(config_id)
+        config_id = BSON::ObjectId(config_id)
+      else
+        begin
+          config_id = JSON.parse(config_id)
+        rescue JSON::ParserError
+          puts "ERROR: Could not parse LEPO_MONGO_CONF. It is not valid JSON: #{config_id}"
+          error!('Unexpected error occured', 500)
+        end
+      end
+
+      config = use_database('lepo_mongo').collection('lepo_config').find_one(config_id)
+
+      unless config
+        puts "ERROR: Could not find configuration document defined in LEPO_MONGO_CONF: #{config_id}"
+        error!('Unexpected error occured', 500)
+      end
+
+      config
+    end
+
+    def default_config
+      {} # TODO
     end
 
     def authenticate!
-      puts params.inspect
-      puts @env.inspect
+      #puts params.inspect
+      #puts @env.inspect
+      puts config.inspect
+      puts @env.keys.inspect
       true
     end
 
