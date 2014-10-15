@@ -47,10 +47,6 @@ module LepoMongo
     end
 
     def authenticate!
-      #puts params.inspect
-      #puts @env.inspect
-      puts config.inspect
-      puts @env.keys.inspect
       true
     end
 
@@ -87,6 +83,30 @@ module LepoMongo
     def use_database(database)
       connection.db(database)
     end
+
+    def extract_data(data)
+      filters = @env['rack.routing_args'].keys.map {|x| x.to_s }
+      data.reject! {|k, v| filters.include?(k) }
+      process_data_recursively(data)
+      data
+    end
+
+    def process_data_recursively(data)
+      # TODO: handle more BSON types?
+      data.keys.each do |k|
+        if data[k].kind_of?(Hash)
+          if data[k]["$date"]
+            data[k] = Time.parse(data[k]["$date"])
+          elsif data[k]["$oid"]
+            data[k] = BSON::ObjectId(data[k]["$oid"])
+          else
+            process_data_recursively(data[k])
+          end
+        end
+      end
+    end
+
+
 
   end
 end

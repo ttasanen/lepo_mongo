@@ -39,6 +39,14 @@ module LepoMongo
     # PATCH /db/collection/id
     # Updates a document
     patch '/:db/:collection/:id' do
+      item = find_by_object_id(params[:id], params[:collection])
+      data = extract_data(params.dup)
+
+      data.reject! {|k, v| ['id', '_id'].include?(k)}
+
+      @db.collection(params[:collection]).update({'_id' => item['_id']}, {'$set' => data})
+
+      find_by_object_id(params[:id], params[:collection])
     end
 
     # DELETE /db/collection/id
