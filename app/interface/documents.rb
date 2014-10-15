@@ -2,13 +2,17 @@ module LepoMongo
   class Documents < Grape::API
 
     helpers do
-      def find_by_object_id(object_id, collection)
-
+      def parse_object_id(object_id)
         unless BSON::ObjectId.legal?(object_id)
           error!("Illegal ObjectID #{params[:id]}", 400)
         end
 
-        id = BSON::ObjectId(object_id)
+        BSON::ObjectId(object_id)
+      end
+
+      def find_by_object_id(id, collection)
+        id = parse_object_id(id) unless id.is_a?(BSON::ObjectId)
+
         item = @db.collection(params[:collection]).find_one(id)
         unless item
           error!("Could not find document with #{id.inspect} in #{params[:db]}.#{params[:collection]}", 404)
@@ -46,7 +50,19 @@ module LepoMongo
 
       @db.collection(params[:collection]).update({'_id' => item['_id']}, {'$set' => data})
 
-      find_by_object_id(params[:id], params[:collection])
+      find_by_object_id(item['_id'], params[:collection])
+    end
+
+    # PUT /db/collection/id
+    # Create or Replace document
+    put '/:db/:collection/:id' do
+      id = parse_object_id(params[:id])
+      data = extract_data(params.dup)
+      data['_id'] = id
+
+      @db.collection(params[:collection]).save(data)
+
+      find_by_object_id(id, params[:collection])
     end
 
     # DELETE /db/collection/id
