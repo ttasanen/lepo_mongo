@@ -8,6 +8,7 @@ module LepoMongo
 
     before do
       authenticate!
+      @db = use_database(params[:db]) if params[:db]
     end
 
     format :json
