@@ -6,7 +6,7 @@ module LepoMongo
     end
 
     def get_connection
-      host = ENV['LEPO_MONGO_HOST'] || 'localhost'
+      host = ENV['LEPO_MONGO_HOST'] || Mongo::MongoClient::DEFAULT_HOST
       port = ENV['LEPO_MONGO_PORT'] || Mongo::MongoClient::DEFAULT_PORT
 
       Mongo::Connection.new(host, port)
