@@ -1,5 +1,3 @@
-require 'interface/collections'
-
 module LepoMongo
   class Databases < Grape::API
 
@@ -21,7 +19,6 @@ module LepoMongo
         error!("Database could not be created", 500)
       end
     end
-
 
     # DELETE /db
     # Deletes given database

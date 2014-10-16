@@ -22,7 +22,6 @@ module LepoMongo
       end
     end
 
-
     # GET /db/collection
     # Gets documents in collection
     get '/:db/:collection' do

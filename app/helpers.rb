@@ -21,7 +21,7 @@ module LepoMongo
 
       return default_config if config_id.nil?
 
-      if  BSON::ObjectId.legal?(config_id)
+      if BSON::ObjectId.legal?(config_id)
         config_id = BSON::ObjectId(config_id)
       else
         begin
@@ -92,7 +92,6 @@ module LepoMongo
     end
 
     def process_data_recursively(data)
-      # TODO: handle more BSON types?
       data.keys.each do |k|
         if data[k].kind_of?(Hash)
           if data[k]["$date"]
@@ -105,8 +104,6 @@ module LepoMongo
         end
       end
     end
-
-
 
   end
 end
