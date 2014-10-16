@@ -39,12 +39,10 @@ module LepoMongo
     post '/:db/:collection' do
 
       data = extract_data(params.dup)
-      puts data.inspect
 
       # TODO: find out why Hashie::Mash errors here, better solution than calling to_hash?
       id = @db.collection(params[:collection]).insert(data.to_hash)
 
-      puts id.inspect
       find_by_object_id(id, params[:collection])
     end
 
