@@ -52,11 +52,11 @@ module LepoMongo
 
     def create_database(database_name)
       use_database(database_name).collection_names
-      database_names.include?(database_name)
+      databases.include?(database_name)
     end
 
     def database_exists?(database_name)
-      database_names.include?(database_name)
+      databases.include?(database_name)
     end
 
     def collection_exists?(database_name, collection_name)
@@ -103,6 +103,11 @@ module LepoMongo
           end
         end
       end
+    end
+
+    def response(status, data = nil)
+      status(status)
+      data
     end
 
   end

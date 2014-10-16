@@ -10,11 +10,12 @@ module LepoMongo
     # POST /
     # Create a new database if it does not exist
     post '/' do
-      error!("Database already exists", 406) if database_exists?(params[:db])
+      if database_exists?(params[:db])
+        error!("Database already exists", 406)
+      end
 
       if create_database(params[:db])
-        status 201
-        {message: 'Database Created'}
+        response(201, {created: params[:db], ok: 1})
       else
         error!("Database could not be created", 500)
       end
@@ -23,7 +24,11 @@ module LepoMongo
     # DELETE /db
     # Deletes given database
     delete '/:db' do
-      # TODO
+      unless database_exists?(params[:db])
+        error!("Could not find Database #{params[:db]}", 404)
+      end
+
+      connection.drop_database(params[:db])
     end
 
   end
