@@ -4,6 +4,10 @@ module LepoMongo
     # GET /db
     # List all collections in given database
     get '/:db' do
+      unless database_exists?(params[:db])
+        error!("Could not find database #{params[:db]}", 404)
+      end
+
       filtered_collections(params[:db])
     end
 
